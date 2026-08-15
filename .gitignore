@@ -1,0 +1,30 @@
+# Build output
+target/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+.apt_generated/
+.factorypath
+
+# VS Code - keep shared settings, ignore per-user state
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Local upgrade-tool scratch (machine paths and session transcripts)
+.github/modernize/
+
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# Logs
+*.log
