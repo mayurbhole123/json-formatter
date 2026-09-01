@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: page(~{::content})}">
+<body>
+<th:block th:fragment="content">
+
+    <section class="hero">
+        <h1>No such tool</h1>
+        <p class="hero-lead">
+            There is no tool at <code>/<span th:text="${missingPath}">tool</span></code>.
+            Pick one from the menu, or start with the formatter.
+        </p>
+        <div class="hero-actions">
+            <a class="button button-primary" th:href="@{/}">All tools</a>
+            <a class="button" th:href="@{/json-formatter}">JSON Formatter</a>
+        </div>
+    </section>
+
+</th:block>
+</body>
+</html>

@@ -6,10 +6,12 @@ import com.jsontools.model.ToolResult;
 import com.jsontools.registry.ToolRegistry;
 import com.jsontools.service.SampleService;
 import com.jsontools.service.ToolExecutor;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,7 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Renders the JSP pages. The tool page also accepts a plain form POST, so every
+ * Renders the Thymeleaf pages. The tool page also accepts a plain form POST, so every
  * tool works with JavaScript switched off; the client script upgrades it to
  * in-page updates via the API.
  */
@@ -34,6 +36,15 @@ public class HomeController {
         this.registry = registry;
         this.samples = samples;
         this.executor = executor;
+    }
+
+    /**
+     * The context path, published for the client script (which prefixes its API
+     * calls with it). {@code @{...}} URLs in the templates handle it themselves.
+     */
+    @ModelAttribute("ctx")
+    public String contextPath(HttpServletRequest request) {
+        return request.getContextPath();
     }
 
     @GetMapping("/")

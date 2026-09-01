@@ -14,17 +14,14 @@
     <groupId>com.jsontools</groupId>
     <artifactId>json-formatter</artifactId>
     <version>1.0.0</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <name>json-formatter</name>
-    <description>JSON Formatter / Validator / Converter suite - Spring Boot MVC + JSP</description>
+    <description>JSON Formatter / Validator / Converter suite - Spring Boot MVC + Thymeleaf</description>
 
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-        <jstl.api.version>3.0.0</jstl.api.version>
-        <jstl.impl.version>3.0.1</jstl.impl.version>
         <json-schema-validator.version>1.5.1</json-schema-validator.version>
         <poi.version>5.2.5</poi.version>
     </properties>
@@ -35,29 +32,10 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- JSP support: Jasper compiles the .jsp files, JSTL supplies the tag libs.
-             Boot 3 runs on Tomcat 10 / Jakarta EE 10, so these are the jakarta.* artifacts. -->
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-jasper</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.servlet.jsp.jstl</groupId>
-            <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
-            <version>${jstl.api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.web</groupId>
-            <artifactId>jakarta.servlet.jsp.jstl</artifactId>
-            <version>${jstl.impl.version}</version>
-        </dependency>
-
-        <!-- Compile scope on purpose: 'provided' is dropped from the runtime classpath
-             when the app is launched from an IDE, which leaves Jasper unregistered and
-             every JSP forward 404s. Build with -Ptomcat-provided for external Tomcat. -->
+        <!-- Server-side HTML: Thymeleaf templates under resources/templates -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
         <!-- YAML read/write via Jackson (version managed by the Boot parent) -->
@@ -100,38 +78,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <configuration>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <!-- Deploying the WAR into a standalone Tomcat 10.1+: that container brings its
-             own Tomcat and Jasper, so keep them out of WEB-INF/lib. -->
-        <profile>
-            <id>tomcat-provided</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-war-plugin</artifactId>
-                        <configuration>
-                            <failOnMissingWebXml>false</failOnMissingWebXml>
-                            <packagingExcludes>
-                                WEB-INF/lib/tomcat-embed-*.jar,
-                                WEB-INF/lib/tomcat-annotations-api-*.jar,
-                                WEB-INF/lib/spring-boot-starter-tomcat-*.jar,
-                                WEB-INF/lib/ecj-*.jar
-                            </packagingExcludes>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>

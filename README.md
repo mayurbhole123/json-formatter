@@ -1,11 +1,11 @@
 # JSON Tools
 
-A Spring Boot MVC application with JSP views offering the tool set found on
+A Spring Boot MVC application with Thymeleaf views offering the tool set found on
 jsonformatter.org: formatting, validation, conversion between JSON/XML/YAML/CSV,
 document comparison and model-class generation.
 
-- **Spring Boot 3.5.5**, **Java 21**, packaged as a WAR
-- **JSP + JSTL 3.0** views (Jakarta EE 10 namespaces)
+- **Spring Boot 3.5.5**, **Java 21**, packaged as an executable JAR
+- **Thymeleaf** views under `resources/templates`
 - 41 tools, all driven from one registry and one generic page
 
 ## Running
@@ -20,11 +20,12 @@ To build a deployable artifact:
 
 ```bash
 ./mvnw clean package
-java -jar target/json-formatter.war
+java -jar target/json-formatter.jar
 ```
 
-The WAR is also deployable to a standalone **Tomcat 10.1+** (Boot 3 runs on
-Jakarta EE 10; Tomcat 9 will not work).
+The JAR is self-contained (embedded Tomcat); no external servlet container is
+involved. Change the port with `--server.port=…` and the context path with
+`--server.servlet.context-path=/tools`.
 
 ### Toolchain requirements
 
@@ -60,8 +61,8 @@ model/       Tool, ToolOption, ToolResult (view models), TypeNode (inferred shap
 registry/    ToolRegistry - the catalogue; one entry per tool
 service/     One service per concern, plus ToolExecutor which dispatches by tool id
 web/         HomeController (pages), ApiController (JSON API)
-webapp/      JSP views - header, footer, index, the generic tool page
-resources/static  CSS and the progressive-enhancement JavaScript
+resources/templates  Thymeleaf views - layout, index, not-found, the generic tool page
+resources/static     CSS and the progressive-enhancement JavaScript
 ```
 
 Adding a tool is a `ToolRegistry` entry plus a branch in `ToolExecutor`; the
@@ -103,6 +104,7 @@ the collapsible tree view, the sandboxed HTML preview and client-side downloads.
 ./mvnw test
 ```
 
-98 tests: a parameterized smoke test running every registered tool against its
+100 tests: a parameterized smoke test running every registered tool against its
 own sample, per-tool behaviour tests for the conversions and generators, and
-MockMvc tests covering the pages, the API and the SSRF guards.
+MockMvc tests covering the pages, the API and the SSRF guards. The page tests
+render the templates for real, so a broken expression fails the build.

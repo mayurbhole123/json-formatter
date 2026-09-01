@@ -7,8 +7,8 @@ import java.util.List;
  * One control rendered into a tool's option bar. The {@code key} is the name the
  * value arrives under in {@link ToolOptions}.
  *
- * <p>A class rather than a record because JSP's expression language resolves
- * JavaBean getters, not record accessors.
+ * <p>A class rather than a record so the templates and Jackson both see plain
+ * JavaBean getters.
  */
 public final class ToolOption {
 
@@ -80,7 +80,7 @@ public final class ToolOption {
     public List<Choice> getChoices() { return choices; }
     public String getPlaceholder()  { return placeholder; }
 
-    // EL cannot compare enum constants conveniently, so expose the discriminators.
+    // The templates branch on these rather than comparing enum constants.
     public boolean isSelect()  { return type == Type.SELECT; }
     public boolean isToggle()  { return type == Type.TOGGLE; }
     public boolean isText()    { return type == Type.TEXT; }

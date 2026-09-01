@@ -8,8 +8,8 @@ import java.util.List;
  * generic tool page renders itself entirely from it, so adding a tool is a
  * registry entry plus a branch in the executor.
  *
- * <p>A class rather than a record because JSP's expression language resolves
- * JavaBean getters, not record accessors.
+ * <p>A class rather than a record so the templates and Jackson both see plain
+ * JavaBean getters.
  */
 public final class Tool {
 

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<!--/*
+  The page skeleton. Every page calls it as
+
+      <html th:replace="~{layout :: page(~{::content})}">
+
+  and supplies its body as a fragment named "content".
+*/-->
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="page(content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="|${pageTitle} &middot; JSON Tools|">JSON Tools</title>
+    <meta name="description" content="Format, validate, convert and generate code from JSON, XML, YAML and CSV.">
+    <link rel="icon" th:href="@{/static/img/favicon.svg}" href="/static/img/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" th:href="@{/static/css/app.css}" href="/static/css/app.css">
+</head>
+<body th:attr="data-ctx=${ctx}">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+    <a class="brand" th:href="@{/}" href="/">
+        <span class="brand-mark">{ }</span>
+        <span class="brand-name">JSON Tools</span>
+    </a>
+    <div class="topbar-search">
+        <label class="sr-only" for="tool-search">Search tools</label>
+        <input type="search" id="tool-search" placeholder="Search tools&hellip;" autocomplete="off">
+    </div>
+    <button type="button" class="icon-button" id="nav-toggle" aria-label="Toggle tool menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+    </button>
+</header>
+
+<div class="shell">
+    <nav class="sidebar" id="sidebar" aria-label="Tools">
+        <th:block th:each="group : ${categories}">
+            <div class="nav-group" data-group th:if="${not #lists.isEmpty(group.value)}">
+                <h2 class="nav-heading" th:text="${group.key.label}">Category</h2>
+                <ul class="nav-list">
+                    <li th:each="item : ${group.value}">
+                        <a th:href="@{|/${item.id}|}"
+                           th:attr="data-name=|${item.title} ${item.tagline}|"
+                           th:classappend="${tool != null and tool.id == item.id} ? 'is-active' : ''"
+                           th:text="${item.title}">Tool</a>
+                    </li>
+                </ul>
+            </div>
+        </th:block>
+    </nav>
+
+    <main class="content" id="main">
+        <th:block th:replace="${content}">Page body</th:block>
+    </main>
+</div>
+
+<footer class="footer">
+    <p>
+        JSON Tools &middot; Spring Boot MVC + Thymeleaf &middot; Java 21.
+        Everything runs on this server; nothing is stored.
+    </p>
+</footer>
+
+<script th:src="@{/static/js/app.js}" src="/static/js/app.js"></script>
+</body>
+</html>

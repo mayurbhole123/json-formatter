@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: page(~{::content})}">
+<body>
+<th:block th:fragment="content">
+
+    <article class="tool"
+             th:attr="data-tool=${tool.id},
+                      data-binary-download=${tool.binaryDownload},
+                      data-download-name=${tool.downloadName},
+                      data-output-view=${tool.outputSyntax}">
+
+        <header class="tool-header">
+            <h1 th:text="${tool.title}">Tool</h1>
+            <p class="tool-tagline" th:text="${tool.tagline}">Tagline</p>
+            <p class="tool-description" th:text="${tool.description}">Description</p>
+        </header>
+
+        <form method="post" th:action="@{|/${tool.id}|}" id="tool-form" novalidate>
+
+            <div class="option-bar">
+                <th:block th:each="opt : ${tool.options}"
+                          th:with="cur=${submitted == null ? opt.defaultValue : submitted[opt.key]}">
+
+                    <div class="option" th:if="${opt.select}">
+                        <label th:for="|opt-${opt.key}|" th:text="${opt.label}">Label</label>
+                        <select th:id="|opt-${opt.key}|" th:name="${opt.key}">
+                            <option th:each="ch : ${opt.choices}"
+                                    th:value="${ch.value}"
+                                    th:selected="${ch.value.equals(cur)}"
+                                    th:text="${ch.label}">Choice</option>
+                        </select>
+                    </div>
+
+                    <div class="option option-check" th:if="${opt.toggle}">
+                        <input type="checkbox" th:id="|opt-${opt.key}|" th:name="${opt.key}" value="true"
+                               th:checked="${submitted == null ? opt.checked : 'true'.equals(cur)}">
+                        <label th:for="|opt-${opt.key}|" th:text="${opt.label}">Label</label>
+                    </div>
+
+                    <div class="option" th:if="${opt.text}">
+                        <label th:for="|opt-${opt.key}|" th:text="${opt.label}">Label</label>
+                        <input type="text" th:id="|opt-${opt.key}|" th:name="${opt.key}"
+                               th:value="${cur}"
+                               th:placeholder="${opt.placeholder}"
+                               spellcheck="false" autocomplete="off">
+                    </div>
+                </th:block>
+
+                <div class="option-actions">
+                    <button type="submit" class="button button-primary" id="run-button"
+                            th:text="${tool.actionLabel}">Run</button>
+                </div>
+            </div>
+
+            <div class="panes" th:classappend="${tool.dualInput} ? 'panes-three' : 'panes-two'">
+
+                <section class="pane">
+                    <header class="pane-header">
+                        <h2 th:text="${tool.inputLabel}">Input</h2>
+                        <div class="pane-tools">
+                            <button type="button" class="link-button" data-action="sample">Sample</button>
+                            <button type="button" class="link-button" data-action="upload" data-target="input">Upload</button>
+                            <button type="button" class="link-button" data-action="url" data-target="input">URL</button>
+                            <button type="button" class="link-button" data-action="clear" data-target="input">Clear</button>
+                        </div>
+                    </header>
+                    <textarea id="input" name="input" class="editor" spellcheck="false"
+                              autocapitalize="off" autocorrect="off"
+                              th:placeholder="|Paste your ${tool.inputSyntax} here&hellip;|"
+                              th:text="${input}"></textarea>
+                    <p class="pane-status" id="input-status"></p>
+                </section>
+
+                <section class="pane" th:if="${tool.dualInput}">
+                    <header class="pane-header">
+                        <h2 th:text="${tool.secondInputLabel}">Second input</h2>
+                        <div class="pane-tools">
+                            <button type="button" class="link-button" data-action="sample2">Sample</button>
+                            <button type="button" class="link-button" data-action="upload" data-target="secondInput">Upload</button>
+                            <button type="button" class="link-button" data-action="url" data-target="secondInput">URL</button>
+                            <button type="button" class="link-button" data-action="clear" data-target="secondInput">Clear</button>
+                        </div>
+                    </header>
+                    <textarea id="secondInput" name="secondInput" class="editor" spellcheck="false"
+                              autocapitalize="off" autocorrect="off" th:text="${secondInput}"></textarea>
+                </section>
+
+                <section class="pane pane-output">
+                    <header class="pane-header">
+                        <h2 th:text="${tool.outputLabel}">Output</h2>
+                        <div class="pane-tools">
+                            <button type="button" class="link-button" data-action="toggle-preview"
+                                    aria-pressed="false" th:if="${tool.tableOutput}">Preview</button>
+                            <button type="button" class="link-button" data-action="copy">Copy</button>
+                            <button type="button" class="link-button" data-action="download"
+                                    th:if="${tool.downloadable}">Download</button>
+                        </div>
+                    </header>
+
+                    <div class="output-area" id="output-area">
+
+                        <div class="alert alert-error" id="error-box"
+                             th:hidden="${result == null or result.ok}">
+                            <strong id="error-message" th:text="${result?.error}"></strong>
+                            <span class="error-position" id="error-position"
+                                  th:if="${result != null and result.positioned}">
+                                line <span th:text="${result.line}">0</span>,
+                                column <span th:text="${result.column}">0</span>
+                            </span>
+                        </div>
+
+                        <div class="alert alert-ok" id="ok-box" th:if="${tool.reportOutput}"
+                             th:hidden="${result == null or not result.ok}">
+                            <strong id="ok-message" th:text="${result?.output}"></strong>
+                        </div>
+
+                        <textarea id="output" class="editor editor-output" readonly spellcheck="false"
+                                  th:hidden="${tool.reportOutput}"
+                                  th:text="${result?.output}"></textarea>
+
+                        <div class="tree-view" id="tree-view" hidden th:if="${tool.treeOutput}"></div>
+
+                        <iframe class="preview-frame" id="preview-frame" title="HTML table preview"
+                                sandbox="" hidden th:if="${tool.tableOutput}"></iframe>
+
+                        <div class="detail-table-wrap" id="detail-wrap"
+                             th:hidden="${result == null or not result.hasDetails}">
+                            <table class="detail-table" id="detail-table">
+                                <thead>
+                                <tr th:if="${tool.diffOutput}">
+                                    <th>Path</th><th>Change</th><th>Left</th><th>Right</th>
+                                </tr>
+                                <tr th:unless="${tool.diffOutput}">
+                                    <th>Location</th><th>Problem</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <th:block th:each="row : ${result?.details}">
+                                    <tr th:if="${tool.diffOutput}">
+                                        <td class="mono" th:text="${row['path']}"></td>
+                                        <td><span class="tag" th:classappend="|tag-${row['typeClass']}|"
+                                                  th:text="${row['type']}"></span></td>
+                                        <td class="mono" th:text="${row['left']}"></td>
+                                        <td class="mono" th:text="${row['right']}"></td>
+                                    </tr>
+                                    <tr th:unless="${tool.diffOutput}">
+                                        <td class="mono" th:text="${row['location']}"></td>
+                                        <td th:text="${row['message']}"></td>
+                                    </tr>
+                                </th:block>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <ul class="stats" id="stats" th:hidden="${result == null or not result.hasStats}">
+                            <li th:each="stat : ${result?.stats}">
+                                <span class="stat-label" th:text="${stat.key}"></span>
+                                <span class="stat-value" th:text="${stat.value}"></span>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+            </div>
+        </form>
+
+        <!--/* Samples ride along in hidden textareas (whose contents the browser
+               entity-decodes, unlike a script block) so "Sample" needs no round trip. */-->
+        <textarea id="sample-data" hidden readonly th:text="${sample}"></textarea>
+        <textarea id="sample-data-2" hidden readonly th:if="${tool.dualInput}"
+                  th:text="${secondSample}"></textarea>
+
+        <input type="file" id="file-input" hidden
+               accept=".json,.txt,.xml,.yaml,.yml,.csv,.tsv,.js,.log,application/json,text/plain,text/xml,text/csv">
+    </article>
+
+</th:block>
+</body>
+</html>

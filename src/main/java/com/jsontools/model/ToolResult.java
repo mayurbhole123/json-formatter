@@ -7,9 +7,9 @@ import java.util.Map;
  * What every tool hands back: the produced text, or a failure message with the
  * parser's error position when there was one.
  *
- * <p>A class rather than a record because JSP's expression language resolves
- * JavaBean getters, not record accessors. Jackson serialises the getters, so the
- * API sees {@code ok, output, error, line, column, stats, details}.
+ * <p>A class rather than a record so the templates and Jackson both see plain
+ * JavaBean getters. Jackson serialises those getters, so the API sees
+ * {@code ok, output, error, line, column, stats, details}.
  */
 public final class ToolResult {
 

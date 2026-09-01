@@ -13,11 +13,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -27,30 +27,44 @@ class WebLayerTest {
     private MockMvc mvc;
 
     // ------------------------------------------------------------------
-    // Pages
+    // Pages - Thymeleaf renders during the test, so these also prove the
+    // templates parse and every expression in them resolves.
     // ------------------------------------------------------------------
 
     @Test
     void homePageListsTheCatalogue() throws Exception {
         mvc.perform(get("/"))
                 .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/WEB-INF/views/index.jsp"))
-                .andExpect(model().attributeExists("categories", "toolCount"));
+                .andExpect(view().name("index"))
+                .andExpect(model().attributeExists("categories", "toolCount"))
+                .andExpect(content().string(containsString("Format &amp; Beautify")))
+                .andExpect(content().string(containsString("/json-formatter")));
     }
 
     @Test
     void aToolPageResolvesToTheGenericToolView() throws Exception {
         mvc.perform(get("/json-formatter"))
                 .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/WEB-INF/views/tool.jsp"))
-                .andExpect(model().attributeExists("tool", "sample", "categories"));
+                .andExpect(view().name("tool"))
+                .andExpect(model().attributeExists("tool", "sample", "categories"))
+                .andExpect(content().string(containsString("data-tool=\"json-formatter\"")))
+                .andExpect(content().string(containsString("id=\"opt-indent\"")));
+    }
+
+    @Test
+    void aDualInputToolRendersBothInputPanes() throws Exception {
+        mvc.perform(get("/json-diff"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("id=\"secondInput\"")))
+                .andExpect(content().string(containsString("panes-three")));
     }
 
     @Test
     void anUnknownPathRendersTheNotFoundPage() throws Exception {
         mvc.perform(get("/no-such-tool"))
                 .andExpect(status().isNotFound())
-                .andExpect(forwardedUrl("/WEB-INF/views/not-found.jsp"));
+                .andExpect(view().name("not-found"))
+                .andExpect(content().string(containsString("No such tool")));
     }
 
     @Test
@@ -59,8 +73,17 @@ class WebLayerTest {
                         .param("input", "{\"a\":1}")
                         .param("indent", "2"))
                 .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/WEB-INF/views/tool.jsp"))
-                .andExpect(model().attributeExists("result"));
+                .andExpect(view().name("tool"))
+                .andExpect(model().attributeExists("result"))
+                .andExpect(content().string(containsString("&quot;a&quot;: 1")));
+    }
+
+    @Test
+    void theFormFallbackShowsAParseErrorInThePage() throws Exception {
+        mvc.perform(post("/json-formatter").param("input", "{oops"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("id=\"error-message\"")))
+                .andExpect(content().string(containsString("line ")));
     }
 
     // ------------------------------------------------------------------

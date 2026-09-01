@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: page(~{::content})}">
+<body>
+<th:block th:fragment="content">
+
+    <section class="hero">
+        <h1>JSON Formatter, Validator &amp; Converter</h1>
+        <p class="hero-lead">
+            <span th:text="${toolCount}">41</span> tools for working with JSON, XML, YAML and CSV &mdash;
+            beautify and validate documents, convert between formats, compare two files,
+            and generate model classes in five languages.
+        </p>
+        <div class="hero-actions">
+            <a class="button button-primary" th:href="@{/json-formatter}">Format JSON</a>
+            <a class="button" th:href="@{/json-validator}">Validate JSON</a>
+            <a class="button" th:href="@{/json-viewer}">View as tree</a>
+        </div>
+    </section>
+
+    <th:block th:each="group : ${categories}">
+        <section class="tool-section" th:if="${not #lists.isEmpty(group.value)}">
+            <h2 class="section-heading" th:text="${group.key.label}">Category</h2>
+            <div class="card-grid">
+                <a class="tool-card" th:each="item : ${group.value}" th:href="@{|/${item.id}|}">
+                    <h3 th:text="${item.title}">Tool</h3>
+                    <p th:text="${item.tagline}">What it does</p>
+                </a>
+            </div>
+        </section>
+    </th:block>
+
+</th:block>
+</body>
+</html>
