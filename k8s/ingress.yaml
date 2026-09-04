@@ -1,0 +1,25 @@
+# Requires: minikube addons enable ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: json-formatter
+  namespace: json-formatter
+  labels:
+    app.kubernetes.io/name: json-formatter
+  annotations:
+    # Uploads are capped at 10MB in the app; let the proxy pass them through
+    nginx.ingress.kubernetes.io/proxy-body-size: 20m
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: json-formatter.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: json-formatter
+                port:
+                  name: http

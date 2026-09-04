@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: json-formatter
+  namespace: json-formatter
+  labels:
+    app.kubernetes.io/name: json-formatter
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: json-formatter
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+# Convenience entry point for `minikube service json-formatter-np -n json-formatter`
+# when you would rather not enable the ingress addon.
+apiVersion: v1
+kind: Service
+metadata:
+  name: json-formatter-np
+  namespace: json-formatter
+  labels:
+    app.kubernetes.io/name: json-formatter
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: json-formatter
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      nodePort: 30080

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: json-formatter-config
+  namespace: json-formatter
+  labels:
+    app.kubernetes.io/name: json-formatter
+data:
+  # Consumed as SPRING_* env vars by the Deployment via envFrom, so anything
+  # here overrides the matching key in application.properties.
+  SPRING_PROFILES_ACTIVE: "k8s"
+  SERVER_PORT: "8080"
+  SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: "10MB"
+  SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: "12MB"
+  LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB: "INFO"
